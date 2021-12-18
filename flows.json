@@ -1,0 +1,209 @@
+[
+    {
+        "id": "c0224953b4129a48",
+        "type": "tab",
+        "label": "Flow 11",
+        "disabled": false,
+        "info": "",
+        "env": []
+    },
+    {
+        "id": "4cccc269597045e1",
+        "type": "mqtt in",
+        "z": "c0224953b4129a48",
+        "name": "",
+        "topic": "listen everything",
+        "qos": "2",
+        "datatype": "auto",
+        "broker": "257348e796a4bc43",
+        "nl": false,
+        "rap": true,
+        "rh": 0,
+        "inputs": 0,
+        "x": 95,
+        "y": 300,
+        "wires": [
+            [
+                "ef9f88dc4940a34d",
+                "d3366416a6deb70d"
+            ]
+        ]
+    },
+    {
+        "id": "d3366416a6deb70d",
+        "type": "function",
+        "z": "c0224953b4129a48",
+        "name": "create query",
+        "func": "var ruleName = msg.req.params.rulename;\nvar topicPattern = msg.req.body.topicPattern;\nvar payloadPattern = msg.req.body.payloadPattern;\nvar method = msg.req.body.method;\nvar webHook = msg.req.body.webHook;\nmsg.topic = \"INSERT INTO ruleEngine (ruleName, topicPAttern,payloadPattern, method, webHook)\" + \" VALUES\" +\n            \" ('\" + ruleName + \"', '\" + topicPattern + \"', '\" +payloadPattern + \"', '\" + method + \"', '\" + webHook + \"');\";\nreturn msg;",
+        "outputs": 1,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 280,
+        "y": 255,
+        "wires": [
+            [
+                "d979accbe32ae3f7"
+            ]
+        ]
+    },
+    {
+        "id": "ef9f88dc4940a34d",
+        "type": "function",
+        "z": "c0224953b4129a48",
+        "name": "search rules",
+        "func": "msg.topic = \"SELECT * FROM ruleEngine\" +\n            \" WHERE\" +\n            \" ('\" + msg.topic + \"' LIKE topicPattern)\" +\n            \" AND\" +\n            \" ('\" + msg.payload + \"' LIKE payloadPattern)\" +\n            \" AND active=1\";\nreturn msg;",
+        "outputs": 1,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 280,
+        "y": 345,
+        "wires": [
+            [
+                "b08414c06e7d4d86"
+            ]
+        ]
+    },
+    {
+        "id": "d979accbe32ae3f7",
+        "type": "mysql",
+        "z": "c0224953b4129a48",
+        "mydb": "677c98630cb31061",
+        "name": "",
+        "x": 450,
+        "y": 255,
+        "wires": [
+            [
+                "4aab0387052718ab"
+            ]
+        ]
+    },
+    {
+        "id": "b08414c06e7d4d86",
+        "type": "mysql",
+        "z": "c0224953b4129a48",
+        "mydb": "677c98630cb31061",
+        "name": "",
+        "x": 450,
+        "y": 345,
+        "wires": [
+            [
+                "96769030da8a70f3"
+            ]
+        ]
+    },
+    {
+        "id": "4aab0387052718ab",
+        "type": "debug",
+        "z": "c0224953b4129a48",
+        "name": "",
+        "active": true,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "payload",
+        "targetType": "msg",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 640,
+        "y": 255,
+        "wires": []
+    },
+    {
+        "id": "96769030da8a70f3",
+        "type": "function",
+        "z": "c0224953b4129a48",
+        "name": "callWebHook",
+        "func": "if(msg.payload.length !== 0)\n{\n    for(var i = 0; i < msg.payload.length; i++)\n    {\n        msg.method = msg.payload[i].method;\n        msg.url = msg.payload[i].webHook;\n        node.send([msg]);\n    }\n}",
+        "outputs": 1,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 640,
+        "y": 345,
+        "wires": [
+            [
+                "82ca284d839c4ff2"
+            ]
+        ]
+    },
+    {
+        "id": "82ca284d839c4ff2",
+        "type": "http request",
+        "z": "c0224953b4129a48",
+        "name": "",
+        "method": "use",
+        "ret": "obj",
+        "paytoqs": "ignore",
+        "url": "",
+        "tls": "",
+        "persist": false,
+        "proxy": "",
+        "authType": "",
+        "senderr": false,
+        "credentials": {},
+        "x": 820,
+        "y": 345,
+        "wires": [
+            [
+                "65815692c57d8b1a"
+            ]
+        ]
+    },
+    {
+        "id": "65815692c57d8b1a",
+        "type": "debug",
+        "z": "c0224953b4129a48",
+        "name": "",
+        "active": true,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "false",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 1000,
+        "y": 345,
+        "wires": []
+    },
+    {
+        "id": "257348e796a4bc43",
+        "type": "mqtt-broker",
+        "name": "",
+        "broker": "192.168.1.51",
+        "port": "1883",
+        "clientid": "",
+        "autoConnect": true,
+        "usetls": false,
+        "protocolVersion": "4",
+        "keepalive": "60",
+        "cleansession": true,
+        "birthTopic": "",
+        "birthQos": "0",
+        "birthPayload": "",
+        "birthMsg": {},
+        "closeTopic": "",
+        "closeQos": "0",
+        "closePayload": "",
+        "closeMsg": {},
+        "willTopic": "",
+        "willQos": "0",
+        "willPayload": "",
+        "willMsg": {},
+        "sessionExpiry": ""
+    },
+    {
+        "id": "677c98630cb31061",
+        "type": "MySQLdatabase",
+        "name": "",
+        "host": "192.168.1.51",
+        "port": "6033",
+        "db": "tSeriesDB",
+        "tz": "",
+        "charset": "UTF8"
+    }
+]
